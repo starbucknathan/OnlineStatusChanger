@@ -1,0 +1,39 @@
+name: Build OnlineStatusChanger DLL
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Setup MSBuild path
+      uses: microsoft/setup-msbuild@v2
+      with:
+        vs-version: 'latest'
+
+    - name: Setup NuGet
+      uses: NuGet/setup-nuget@v1
+
+    - name: Restore NuGet packages
+      run: nuget restore
+
+    - name: Build Project
+      run: msbuild OnlineStatusChanger/OnlineStatusChanger.vcxproj /p:Configuration=Release /p:Platform=x64 /p:WarningLevel=0
+
+    - name: Upload DLL artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: OnlineStatusChanger-DLL
+        path: OnlineStatusChanger/x64/Release/OnlineStatusChanger.dll
+        if-no-files-found: warn
